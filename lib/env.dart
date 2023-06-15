@@ -1,4 +1,5 @@
 import 'package:envied/envied.dart';
+
 part 'env.g.dart';
 
 //根据你的需要配置里面的字段
