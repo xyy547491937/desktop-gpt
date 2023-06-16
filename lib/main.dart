@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app1/widgets/chat_screen.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-void main() {
+import 'data/database.dart';
+import 'injection.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  db = await $FloorAppDatabase.databaseBuilder('app_database.db').build();
   runApp(
     const ProviderScope(
       child: MyApp(),

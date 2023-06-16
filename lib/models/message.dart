@@ -1,30 +1,43 @@
+import 'package:floor/floor.dart';
+// import 'package:freezed_annotation/freezed_annotation.dart';
+
+// part 'message.freezed.dart';
+// part 'message.g.dart';
+@ForeignKey(
+  childColumns: ["session_id"],
+  parentColumns: ['id'],
+  entity: Message,
+)
+@ColumnInfo(name: "session_id")
+late final int sessionId;
+
+@entity
 class Message {
-  late final String content;
-  late final bool isUser;
-  late final String? id;
-  late final DateTime timestamp;
+  @primaryKey
+  final String id;
+  final String content;
+  final bool isUser;
+  final DateTime timestamp;
+  Message({
+    required this.id,
+    required this.content,
+    required this.isUser,
+    required this.timestamp,
+  });
+}
 
-  Message(
-      {required this.content,
-      required this.isUser,
-      required this.timestamp,
-      this.id});
-
-  Map<String, dynamic> toJson() => {
-        "content": content,
-        "isUser": isUser,
-        "id": id,
-        "timestamp": timestamp.toIso8601String()
-      };
-
+extension MessageExtension on Message {
   Message copyWith({
+    String? id,
     String? content,
     bool? isUser,
     DateTime? timestamp,
-  }) =>
-      Message(
-        content: content ?? this.content,
-        isUser: isUser ?? this.isUser,
-        timestamp: timestamp ?? this.timestamp,
-      );
+  }) {
+    return Message(
+      id: id ?? this.id,
+      content: content ?? this.content,
+      isUser: isUser ?? this.isUser,
+      timestamp: timestamp ?? this.timestamp,
+    );
+  }
 }

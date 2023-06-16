@@ -1,5 +1,4 @@
 import 'package:flutter_app1/injection.dart';
-import 'package:logger/logger.dart';
 import 'package:openai_api/openai_api.dart';
 
 import '../env.dart';

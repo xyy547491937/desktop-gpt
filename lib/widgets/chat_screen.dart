@@ -1,22 +1,29 @@
 // ignore_for_file: unused_local_variable
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app1/models/message_item.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_app1/injection.dart';
+import 'package:flutter_app1/markdown/latex.dart';
 import 'package:flutter_app1/states/message_state.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:logger/logger.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import '../models/message.dart';
 import '../states/chat_ui_state.dart';
+import 'package:markdown_widget/markdown_widget.dart';
 
 class ChatScreen extends HookConsumerWidget {
   final _textController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
   ChatScreen({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final chatUIState = ref.watch(chatUiProvider);
+
+    void _handleKeyPress(RawKeyEvent event, WidgetRef ref) {
+      if (event.logicalKey == LogicalKeyboardKey.enter) {
+        _sendMessage(ref, _textController.text);
+      }
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Chat'),
@@ -30,22 +37,29 @@ class ChatScreen extends HookConsumerWidget {
               child: ChatMessageList(),
             ),
             // 输入框
-            TextField(
-              enabled: !chatUIState.requestLoading,
-              controller: _textController,
-              decoration: InputDecoration(
-                  hintText: 'Type a message', // 显示在输入框内的提示文字
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      // 这里处理发送事件
-                      if (_textController.text.isNotEmpty) {
-                        _sendMessage(ref, _textController.text);
-                      }
-                    },
-                    icon: const Icon(
-                      Icons.send,
-                    ),
-                  )),
+            RawKeyboardListener(
+              focusNode: _focusNode,
+              onKey: (e) {
+                logger.d(e);
+                _handleKeyPress(e, ref);
+              },
+              child: TextField(
+                enabled: !chatUIState.requestLoading,
+                controller: _textController,
+                decoration: InputDecoration(
+                    hintText: 'Type a message', // 显示在输入框内的提示文字
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        // 这里处理发送事件
+                        if (_textController.text.isNotEmpty) {
+                          _sendMessage(ref, _textController.text);
+                        }
+                      },
+                      icon: const Icon(
+                        Icons.send,
+                      ),
+                    )),
+              ),
             ),
           ],
         ),
@@ -146,10 +160,37 @@ class MessageItem extends StatelessWidget {
         Flexible(
           child: Container(
             margin: const EdgeInsets.only(top: 12, right: 48),
-            child: Text(message.content),
+            // child: Text(message.content),
+            child: MessageContentWidget(
+              message: message,
+            ),
           ),
         ),
       ],
+    );
+  }
+}
+
+class MessageContentWidget extends StatelessWidget {
+  const MessageContentWidget({
+    super.key,
+    required this.message,
+  });
+
+  final Message message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: MarkdownGenerator(
+        generators: [
+          latexGenerator,
+        ],
+        inlineSyntaxes: [
+          LatexSyntax(),
+        ],
+      ).buildWidgets(message.content),
     );
   }
 }

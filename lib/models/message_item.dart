@@ -27,7 +27,7 @@ class MessageItem extends StatelessWidget {
         ),
         Flexible(
           child: Container(
-            margin: EdgeInsets.only(top: 12),
+            margin: const EdgeInsets.only(top: 12),
             child: Text(message.content),
           ),
         )
